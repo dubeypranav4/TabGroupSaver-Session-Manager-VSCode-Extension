@@ -13,8 +13,9 @@ export class TabGroupTreeItem extends vscode.TreeItem {
     ) {
         super(tabGroup.groupName, collapsibleState);
 
-        this.tooltip = `${tabGroup.files.length} files`;
-        this.description = `${tabGroup.files.length} files`;
+        const fileCount = getTabGroupFiles(tabGroup).length;
+        this.tooltip = `${fileCount} files`;
+        this.description = `${fileCount} files`;
 
         // Set icon based on whether this is the default group
         this.iconPath = tabGroup.isDefault
@@ -95,7 +96,7 @@ export class TabGroupTreeDataProvider
             );
         } else if (element instanceof TabGroupTreeItem) {
             // Tab group level - show files
-            return element.tabGroup.files.map(
+            return getTabGroupFiles(element.tabGroup).map(
                 (filePath) => new FileTreeItem(filePath)
             );
         }
@@ -132,4 +133,24 @@ export function registerTabGroupTreeView(
     );
 
     return treeView;
+}
+
+function getTabGroupFiles(tabGroup: TabGroup): string[] {
+    if (tabGroup.files && tabGroup.files.length > 0) {
+        return tabGroup.files;
+    }
+
+    const groupedFiles = tabGroup.groups?.flatMap(group =>
+        group.tabs
+            .map(tab => {
+                try {
+                    return vscode.Uri.parse(tab).fsPath;
+                } catch {
+                    return undefined;
+                }
+            })
+            .filter((filePath): filePath is string => Boolean(filePath))
+    );
+
+    return groupedFiles ?? [];
 }

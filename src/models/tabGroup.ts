@@ -8,9 +8,14 @@ export interface TabGroup {
     groupName: string;
     
     /**
-     * Array of file paths in the tab group
+     * Legacy flat file-path list used by older extension versions
      */
-    files: string[];
+    files?: string[];
+
+    /**
+     * Grouped editor layout with per-editor-group tabs
+     */
+    groups?: SavedEditorGroup[];
     
     /**
      * When the tab group was created
@@ -26,6 +31,14 @@ export interface TabGroup {
      * Whether this is the default group to restore on startup
      */
     isDefault?: boolean;
+}
+
+/**
+ * A persisted editor group with tab URIs
+ */
+export interface SavedEditorGroup {
+    viewColumn?: number;
+    tabs: string[];
 }
 
 /**
